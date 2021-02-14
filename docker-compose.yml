@@ -1,18 +1,15 @@
 version: '3'
 
 services:
-    mysql:
-        container_name: 'symfony-docker-api_mysql'
-        image: mysql:8.0.20
-        command:
-            - '--character-set-server=utf8mb4'
-            - '--collation-server=utf8mb4_unicode_ci'
-            - '--default-authentication-plugin=mysql_native_password'
+    db:
+        container_name: 'user-api_db'
+        image: mysql:5.7
+        command: --default-authentication-plugin=mysql_native_password
         environment:
+            MYSQL_ROOT_PASSWORD: '!Er83lDf5BmsQ8fgcK!'
             MYSQL_DATABASE: 'user_api'
             MYSQL_USER: 'user_api_user'
             MYSQL_PASSWORD: '!Df5Bmsr83l8KQfgcE!'
-            MYSQL_ROOT_PASSWORD: '!Er83lDf5BmsQ8fgcK!'
         ports:
             - 3366:3306
         volumes:
@@ -20,28 +17,23 @@ services:
         networks:
             - symfony
     php:
-        container_name: 'symfony-docker-api_php-fpm'
+        container_name: 'user-api_php'
         build:
             context: ./docker
             dockerfile: Dockerfile-php
-            args:
-                TIMEZONE: 'Europe/Kiev'
-        environment:
-            APP_ENV: dev
+        depends_on:
+            - db
         volumes:
             - ./:/var/www/html/
         networks:
             - symfony
-        ports:
-            - 9000:9000
     nginx:
-        container_name: 'symfony-docker-api_nginx'
+        container_name: 'user-api_nginx'
         build:
             context: ./docker
             dockerfile: Dockerfile-nginx
         depends_on:
             - php
-            - mysql
         volumes:
             - ./:/var/www/html/
         ports:
